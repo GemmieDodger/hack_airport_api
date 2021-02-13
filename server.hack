@@ -8,11 +8,11 @@
 //THIS WORKS TO CONNECT TO DATABASE
 async function do_connect(): Awaitable<\AsyncMysqlQueryResult> {
 
-    $host = "localhost";
+    $host = "";
     $port = 3000;
-    $db = "airports";
-    $user = "root";
-    $passwd = "password"; //this needs looking at to not be plain text...
+    $db = "";
+    $user = "";
+    $passwd = ""; //this needs looking at to not be plain text...
   // Cast because the array from get_connection_info() is a mixed
   $conn = await \AsyncMysqlClient::connect(
     $host,
