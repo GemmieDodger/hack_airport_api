@@ -1,47 +1,14 @@
 
 
-//https://docs.hhvm.com/hack/reference/class/AsyncMysqlClient/connect/
-
-
-//https://docs.hhvm.com/hack/reference/class/AsyncMysqlClient/connect/
-// use \usr\local\mysql\bin as CI;
-//THIS WORKS TO CONNECT TO DATABASE
-async function do_connect(): Awaitable<\AsyncMysqlQueryResult> {
+async function get_connection(): Awaitable<\AsyncMysqlConnection> {
 
     $host = "";
     $port = 3000;
     $db = "";
     $user = "";
-    $passwd = ""; //this needs looking at to not be plain text...
-  // Cast because the array from get_connection_info() is a mixed
-  $conn = await \AsyncMysqlClient::connect(
-    $host,
-    $port,
-    $db,
-    $user,
-    $passwd,
-  );
-  return await $conn->query('SELECT * FROM airports');
-}
-
-
-async function run_it(): Awaitable<void> {
-  $res = await do_connect();
-
-  var_dump(get_object_vars($res));
-  \var_dump($res->numRows()); // The number of rows from the SELECT statement
-}
-
-async function get_connection(): Awaitable<\AsyncMysqlConnection> {
-
-    $host = "localhost";
-    $port = 3000;
-    $db = "airports";
-    $user = "root";
-    $passwd = "password"; //this needs looking at to not be plain text...
+    $passwd = ""; 
   // Get a connection pool with default options
   $pool = new \AsyncMysqlConnectionPool(darray[]);
-  // Change credentials to something that works in order to test this code
   return await $pool->connect(
     $host,
     $port,
@@ -98,21 +65,15 @@ async function delete_airport(
   \AsyncMysqlConnection $conn,
   int $id,
 ): Awaitable<Vector<Map<string, ?string>>>  {
-  // Your table and column may differ, of course
   $result = await $conn->queryf(
     'DELETE FROM airports WHERE ID = %d',
     $id,
   );
-  // There shouldn't be more than one row returned for one user id
   $check = await $conn->queryf(
     'SELECT * from airports',
   );
-  // A vector of vector objects holding the string values of each column
-  // in the query
-  // $vector = $result->vectorRows();
-  // $count = $vector->count();
  $map = $result->mapRows();
-  return $map; // We had one column in our query
+  return $map; 
 }
 
 //UPDATE ONE
@@ -143,35 +104,20 @@ async function fetch_airport_name(
   return $vector[0][0]; 
 }
 
-// async function get_airport_info(
-//   \AsyncMysqlConnection $conn,
-//   string $name,
-// ): Awaitable<Vector<Map<string, ?string>>> {
-//   $result = await $conn->queryf(
-//     'SELECT * from airports WHERE name = %s',
-//     $conn->escapeString($name),
-//   );
-//   // A vector of map objects holding the string values of each column
-//   // in the query, and the keys being the column names
-//   $map = $result->mapRows();
-//   return $map;
-// }
 
 <<__EntryPoint>>
 async function async_mysql_tutorial(): Awaitable<void> {
   $conn = await get_connection();
   if ($conn !== null) {
-    // $result = await fetch_airport_name($conn, 2);
-    // \var_dump($result);
+
     print("fetch airport 2");
     $airport = await fetch_airport($conn, 2);
     \var_dump($airport);
-    // $info = await get_airport_info($conn, 'Chicago');
         print("fetch all airports");
     $airports = await fetch_airports($conn);
     \var_dump($airports);   
     print_r("delete denver"); 
-    $airports = await delete_airport($conn, 6); //DENVER
+    $airports = await delete_airport($conn, 6); 
      print_r("fetch all excluding denver"); 
      $airports = await fetch_airports($conn);
     \var_dump($airports);   
